@@ -1,6 +1,6 @@
 ﻿// <copyright>
 // Copyright Southeast Christian Church
-// Copyright Mark Lee
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,9 +56,14 @@ namespace RockWeb.Plugins.Avalanche
                                                    .ConvertMarkdownToHtml();
         }
 
-        public override MobileBlock GetMobile( string paramater )
+        public override MobileBlock GetMobile( string parameter )
         {
-            AvalancheUtilities.SetActionItems( GetAttributeValue( "ActionItem" ), CustomAttributes, CurrentPerson );
+            AvalancheUtilities.SetActionItems( GetAttributeValue( "ActionItem" ),
+                                   CustomAttributes,
+                                   CurrentPerson, AvalancheUtilities.GetMergeFields( CurrentPerson ),
+                                   GetAttributeValue( "EnabledLavaCommands" ),
+                                   parameter );
+
             var valueGuid = GetAttributeValue( "Component" );
             var value = DefinedValueCache.Read( valueGuid );
             if ( value != null )
@@ -66,8 +71,8 @@ namespace RockWeb.Plugins.Avalanche
                 CustomAttributes["Component"] = value.GetAttributeValue( "ComponentType" );
             }
 
-            CustomAttributes["Content"] = GetContent();
-            CustomAttributes["InitialRequest"] = "Refresh";
+            CustomAttributes["Content"] = GetContent( parameter );
+            CustomAttributes["InitialRequest"] = parameter;
 
             return new MobileBlock()
             {
@@ -77,26 +82,23 @@ namespace RockWeb.Plugins.Avalanche
         }
         public override MobileBlockResponse HandleRequest( string request, Dictionary<string, string> Body )
         {
-            if ( request == "Refresh" )
-            {
-                var content = GetContent();
-                var response = "{\"Content\": " + content + "}";
+            var content = GetContent( request );
+            var response = "{\"Content\": " + content + "}";
 
-                return new MobileBlockResponse()
-                {
-                    Request = request,
-                    Response = response,
-                    TTL = PageCache.OutputCacheDuration
-                };
-            }
-            return base.HandleRequest( request, Body );
+            return new MobileBlockResponse()
+            {
+                Request = request,
+                Response = response,
+                TTL = PageCache.OutputCacheDuration
+            };
         }
 
-        private string GetContent()
+        private string GetContent( string parameter = "" )
         {
             return AvalancheUtilities.ProcessLava( GetAttributeValue( "Lava" ),
                                                                CurrentPerson,
-                                                               enabledLavaCommands: GetAttributeValue( "EnabledLavaCommands" ) );
+                                                               parameter,
+                                                               GetAttributeValue( "EnabledLavaCommands" ) );
         }
     }
 }

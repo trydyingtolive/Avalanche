@@ -1,6 +1,6 @@
 ﻿// <copyright>
 // Copyright Southeast Christian Church
-// Copyright Mark Lee
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,14 +19,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Caching;
-using System.Text;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Avalanche;
 using Avalanche.Models;
-using DotLiquid;
 using Newtonsoft.Json;
 using Rock;
 using Rock.Attribute;
@@ -60,8 +57,10 @@ namespace RockWeb.Plugins.Avalanche
     [TextField( "Description Lava", "The attribute key of the descriptionch formatted for mobile.", false, "", "CustomSetting" )]
     [TextField( "Image Lava", "The attribute key of the image to show on the list view will hide icon if not blank.", false, "", "CustomSetting" )]
     [TextField( "Icon Lava", "The attribute key of the icon to show on the list view.", false, "", "CustomSetting" )]
-
-    public partial class ContentChannelMobileList : AvalancheBlockCustomSettings
+    [TextField( "Order Lava", "Lava to help order the items in the list {{Item}}", true, "", "CustomSetting" )]
+    [DefinedValueField( AvalancheUtilities.MobileListViewComponent, "Component", "Different components will display your list in different ways." )]
+    [KeyValueListField( "Custom Attributes", "Custom attributes to set on block.", false, keyPrompt: "Attribute", valuePrompt: "Value" )]
+    public partial class ContentChannelMobileList : RockBlockCustomSettings, IMobileResource
     {
         #region Fields
 
@@ -256,6 +255,7 @@ namespace RockWeb.Plugins.Avalanche
             SetAttributeValue( "IconLava", tbIconLava.Text );
             SetAttributeValue( "ImageLava", tbImageLava.Text );
             SetAttributeValue( "SubtitleLava", tbSubtitleLava.Text );
+            SetAttributeValue( "OrderLava", tbOrder.Text );
 
             var ppFieldType = new PageReferenceFieldType();
             SetAttributeValue( "DetailPage", ppFieldType.GetEditValue( ppDetailPage, null ) );
@@ -381,6 +381,7 @@ $(document).ready(function() {
             tbIconLava.Text = GetAttributeValue( "IconLava" );
             tbImageLava.Text = GetAttributeValue( "ImageLava" );
             tbSubtitleLava.Text = GetAttributeValue( "SubtitleLava" );
+            tbOrder.Text = GetAttributeValue( "OrderLava" );
 
             var ppFieldType = new PageReferenceFieldType();
             ppFieldType.SetEditValue( ppDetailPage, null, GetAttributeValue( "DetailPage" ) );
@@ -400,9 +401,6 @@ $(document).ready(function() {
 
         private List<ListElement> ShowView( int page )
         {
-            Dictionary<string, object> linkedPages = new Dictionary<string, object>();
-            linkedPages.Add( "DetailPage", LinkedPageRoute( "DetailPage" ) );
-
             var errorMessages = new List<string>();
             List<ContentChannelItem> content;
             try
@@ -422,10 +420,6 @@ $(document).ready(function() {
                 content = new List<ContentChannelItem>();
             }
             var count = GetAttributeValue( "Count" ).AsInteger();
-            if ( page > 0 )
-            {
-                page--;
-            }
 
             content = content.Skip( page * count ).Take( count ).ToList();
 
@@ -433,6 +427,7 @@ $(document).ready(function() {
             var descriptionLava = GetAttributeValue( "DescriptionLava" );
             var imageLava = GetAttributeValue( "ImageLava" );
             var iconLava = GetAttributeValue( "IconLava" );
+            var orderLava = GetAttributeValue( "OrderLava" );
 
 
             List<ListElement> listViews = new List<ListElement>();
@@ -459,6 +454,10 @@ $(document).ready(function() {
                 if ( !string.IsNullOrWhiteSpace( iconLava ) )
                 {
                     mlv.Icon = ProcessLava( iconLava, item );
+                }
+                if ( !string.IsNullOrWhiteSpace( orderLava ) )
+                {
+                    mlv.Order = ProcessLava( orderLava, item );
                 }
                 listViews.Add( mlv );
             }
@@ -760,7 +759,7 @@ $(document).ready(function() {
                         .ToList() )
                     {
                         // remove EntityFields that aren't attributes for this ContentChannelType or ChannelChannel (to avoid duplicate Attribute Keys)
-                        var attribute = AttributeCache.Read( entityField.AttributeGuid.Value );
+                        var attribute = AttributeCache.Get( entityField.AttributeGuid.Value );
                         if ( attribute != null &&
                             attribute.EntityTypeQualifierColumn == "ContentChannelTypeId" &&
                             attribute.EntityTypeQualifierValue.AsInteger() != channel.ContentChannelTypeId )
@@ -1002,12 +1001,35 @@ $(document).ready(function() {
             }
         }
 
-        public override MobileBlock GetMobile( string parameter )
+        private Dictionary<string, string> _customAtributes;
+        public Dictionary<string, string> CustomAttributes
+        {
+            get
+            {
+                if ( _customAtributes == null )
+                {
+                    _customAtributes = new Dictionary<string, string>();
+                    var customs = GetAttributeValue( "CustomAttributes" ).ToKeyValuePairList();
+                    foreach ( var item in customs )
+                    {
+                        _customAtributes[item.Key] = HttpUtility.UrlDecode( ( string ) item.Value );
+                    }
+                }
+                return _customAtributes;
+            }
+        }
+        public MobileBlock GetMobile( string parameter )
         {
             var pageGuid = GetAttributeValue( "DetailPage" );
+            CustomAttributes["Resource"] = PageCache.Read( pageGuid.AsGuid() ).Id.ToString();
             CustomAttributes["ActionType"] = "1";
-            CustomAttributes["Request"] = "0";
             CustomAttributes["InitialRequest"] = "0";
+            var valueGuid = GetAttributeValue( "Component" );
+            var value = DefinedValueCache.Read( valueGuid );
+            if ( value != null )
+            {
+                CustomAttributes["Component"] = value.GetAttributeValue( "ComponentType" );
+            }
 
             return new MobileBlock()
             {
@@ -1016,7 +1038,7 @@ $(document).ready(function() {
             };
         }
 
-        public override MobileBlockResponse HandleRequest( string request, Dictionary<string, string> Body )
+        public MobileBlockResponse HandleRequest( string request, Dictionary<string, string> Body )
         {
             var page = request.AsInteger();
 

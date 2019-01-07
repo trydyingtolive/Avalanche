@@ -21,6 +21,7 @@ using Avalanche.Utilities;
 using Avalanche;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Avalanche.Interfaces;
 
 namespace Avalanche.Blocks
 {
@@ -66,7 +67,10 @@ namespace Avalanche.Blocks
                     App.Current.MainPage.DisplayAlert( "Log-in Error", "Your username or password was incorrect.", "OK" );
                     break;
                 case LoginResponse.Success:
-                    App.Current.MainPage = new NavigationPage( new Avalanche.MainPage( "home" ) );
+                    AvalancheNavigation.Footer = null;
+                    App.Current.MainPage = new AvalanchePage();
+                    AvalancheNavigation.RequestNewRckipid();
+                    FCMHelper.RegisterFCMToken();
                     break;
                 default:
                     break;

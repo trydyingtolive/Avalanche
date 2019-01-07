@@ -1,5 +1,6 @@
 ﻿// <copyright>
 // Copyright Southeast Christian Church
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 
@@ -21,6 +23,13 @@ namespace Avalanche.Utilities
 {
     public static class AttributeHelper
     {
+        private static string[] trueStrings = new string[] { "true", "yes", "t", "y", "1" };
+
+        public static bool IsTrue( string s )
+        {
+            return ( trueStrings.Contains( s.ToLower() ) );
+        }
+
         private static Dictionary<string, TypeConverter> typeConverters = new Dictionary<string, TypeConverter>
         {
             {typeof(Accelerator).Name, new AcceleratorTypeConverter() },
@@ -41,12 +50,18 @@ namespace Avalanche.Utilities
             {typeof(Thickness).Name, new ThicknessTypeConverter() },
             {typeof(Type).Name, new TypeTypeConverter() },
             {typeof(Uri).Name, new Xamarin.Forms.UriTypeConverter() },
-            {typeof(WebViewSource).Name, new  WebViewSourceTypeConverter()}
+            {typeof(WebViewSource).Name, new  WebViewSourceTypeConverter() },
+            { "CustomFontFamily", new CustomFontTypeConverter() }
         };
 
 
         public static void ApplyTranslation( object obj, Dictionary<string, string> attributes )
         {
+            if ( attributes == null )
+            {
+                return;
+            }
+
             foreach ( var attribute in attributes )
             {
                 if ( string.IsNullOrWhiteSpace( attribute.Value ) )
@@ -62,7 +77,14 @@ namespace Avalanche.Utilities
 
                 if ( property.PropertyType == typeof( string ) )
                 {
-                    property.SetValue( obj, attribute.Value );
+                    if ( property.Name == "FontFamily" )
+                    {
+                        property.SetValue( obj, typeConverters["CustomFontFamily"].ConvertFromInvariantString( attribute.Value ) );
+                    }
+                    else
+                    {
+                        property.SetValue( obj, attribute.Value );
+                    }
                 }
                 else if ( property.PropertyType == typeof( int ) )
                 {
@@ -80,60 +102,22 @@ namespace Avalanche.Utilities
                         property.SetValue( obj, new ImageSourceConverter().ConvertFromInvariantString( attribute.Value ) );
                     }
                 }
+                else if ( property.PropertyType == typeof( bool ) )
+                {
+                    if ( trueStrings.Contains( attribute.Value.ToLower() ) )
+                    {
+                        property.SetValue( obj, true );
+                    }
+                    else
+                    {
+                        property.SetValue( obj, false );
+                    }
+                }
                 else if ( typeConverters.ContainsKey( property.PropertyType.Name ) )
                 {
                     property.SetValue( obj, typeConverters[property.PropertyType.Name].ConvertFromInvariantString( attribute.Value ) );
                 }
             }
         }
-
-        public static void HandleActionItem( Dictionary<string, string> Attributes )
-        {
-            if ( !Attributes.ContainsKey( "ActionType" ) || Attributes["ActionType"] == "0" )
-            {
-                return;
-            }
-
-            var resource = "";
-            if ( Attributes.ContainsKey( "Resource" ) )
-            {
-                resource = Attributes["Resource"];
-            }
-
-            var parameter = "";
-            if ( Attributes.ContainsKey( "Parameter" ) )
-            {
-                parameter = Attributes["Parameter"];
-            }
-
-            if ( Attributes["ActionType"] == "1" && !string.IsNullOrWhiteSpace( resource ) ) //push new page
-            {
-                AvalancheNavigation.GetPage( Attributes["Resource"], parameter );
-            }
-            else if ( Attributes["ActionType"] == "2" && !string.IsNullOrWhiteSpace( resource ) ) //replace
-            {
-                AvalancheNavigation.ReplacePage( Attributes["Resource"], parameter );
-            }
-            else if ( Attributes["ActionType"] == "3" ) //pop page
-            {
-                AvalancheNavigation.RemovePage();
-            }
-            else if ( Attributes["ActionType"] == "4" && !string.IsNullOrWhiteSpace( resource ) )
-            {
-                if ( !string.IsNullOrWhiteSpace( parameter ) )
-                {
-                    if ( resource.Contains( "?" ) )
-                    {
-                        resource += "&rckipid=" + parameter;
-                    }
-                    else
-                    {
-                        resource += "?rckipid=" + parameter;
-                    }
-                }
-                Device.OpenUri( new Uri( resource ) );
-            }
-        }
-
     }
 }

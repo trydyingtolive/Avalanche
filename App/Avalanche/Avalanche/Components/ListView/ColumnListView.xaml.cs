@@ -1,6 +1,6 @@
 ﻿// <copyright>
 // Copyright Southeast Christian Church
-// Copyright Mark Lee
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Avalanche.CustomControls;
 using Avalanche.Models;
 using FFImageLoading.Forms;
+using FFImageLoading.Svg.Forms;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -41,9 +42,10 @@ namespace Avalanche.Components.ListView
             set
             {
                 _columns = value;
-                _resetItems();
+                Draw();
             }
         }
+        public double ImageWidth { get; set; } = 0;
 
         private bool _isRefreshing;
         public bool IsRefreshing
@@ -58,7 +60,7 @@ namespace Avalanche.Components.ListView
                 aiLoading.IsRunning = value;
             }
         }
-        public ObservableCollection<ListElement> ItemsSource { get; set; }
+        public List<ListElement> ItemsSource { get; set; }
         public object SelectedItem { get; set; }
         public bool CanRefresh { get; set; }
 
@@ -66,11 +68,12 @@ namespace Avalanche.Components.ListView
         public event EventHandler<SelectedItemChangedEventArgs> ItemSelected;
         public event EventHandler<ItemVisibilityEventArgs> ItemAppearing;
 
+        private double YScroll = 0;
+
         public ColumnListView()
         {
             InitializeComponent();
-            ItemsSource = new ObservableCollection<ListElement>();
-            ItemsSource.CollectionChanged += ItemsSource_CollectionChanged;
+            ItemsSource = new List<ListElement>();
 
             for ( var i = 0; i < Columns; i++ )
             {
@@ -82,6 +85,10 @@ namespace Avalanche.Components.ListView
 
         private void SvScrollView_Scrolled( object sender, ScrolledEventArgs e )
         {
+            if ( svScrollView.ScrollY > YScroll)
+            {
+                YScroll = svScrollView.ScrollY;
+            }
             double scrollingSpace = svScrollView.ContentSize.Height - svScrollView.Height - 20;
 
             if ( scrollingSpace <= e.ScrollY && !IsRefreshing )
@@ -93,24 +100,7 @@ namespace Avalanche.Components.ListView
             }
         }
 
-        private void ItemsSource_CollectionChanged( object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e )
-        {
-            if ( e.Action == NotifyCollectionChangedAction.Add )
-            {
-                AddItems( e );
-            }
-            else
-            {
-                ResetItems( e );
-            }
-        }
-
-        private void ResetItems( NotifyCollectionChangedEventArgs e )
-        {
-            _resetItems();
-        }
-
-        private void _resetItems()
+        public void  Draw()
         {
             gGrid.Children.Clear();
             gGrid.RowDefinitions.Clear();
@@ -127,42 +117,62 @@ namespace Avalanche.Components.ListView
                 gGrid.RowDefinitions.Add( new RowDefinition() { Height = new GridLength( 1, GridUnitType.Auto ) } );
             }
 
+            int itemNumber = 0;
             foreach ( ListElement item in ItemsSource )
             {
                 AddCell( item,
-                         ( ItemsSource.Count - 1 ) % Convert.ToInt32( Columns ),
-                         Convert.ToInt32( Math.Floor( ( ItemsSource.Count - 1 ) / Columns ) ) );
+                         ( itemNumber ) % Convert.ToInt32( Columns ),
+                         Convert.ToInt32( Math.Floor( ( itemNumber ) / Columns ) ) );
+                itemNumber++;
             }
-        }
-
-        private void AddItems( NotifyCollectionChangedEventArgs e )
-        {
-            while ( gGrid.RowDefinitions.Count < ItemsSource.Count / Columns )
-            {
-                gGrid.RowDefinitions.Add( new RowDefinition() { Height = new GridLength( 1, GridUnitType.Auto ) } );
-            }
-
-            foreach ( ListElement item in e.NewItems )
-            {
-                AddCell( item,
-                        ( ItemsSource.Count - 1 ) % Convert.ToInt32( Columns ),
-                        Convert.ToInt32( Math.Floor( ( ItemsSource.Count - 1 ) / Columns ) ) );
-            }
+                Device.BeginInvokeOnMainThread(async () =>
+                {
+                    await Task.Delay(100);
+                    await svScrollView.ScrollToAsync(0, YScroll, false);
+                });
         }
 
         private void AddCell( ListElement item, int x, int y )
         {
-            StackLayout sl = new StackLayout() { HorizontalOptions = LayoutOptions.Center };
+            StackLayout sl = new StackLayout()
+            {
+                HorizontalOptions = LayoutOptions.Center,
+                Spacing = 0
+            };
             if ( !string.IsNullOrWhiteSpace( item.Image ) )
             {
-                CachedImage img = new CachedImage()
+                if ( item.Image.Contains( ".svg" ) )
                 {
-                    Source = item.Image,
-                    Aspect = Aspect.AspectFit,
-                    WidthRequest = App.Current.MainPage.Width / Columns,
-                    InputTransparent = true
-                };
-                sl.Children.Add( img );
+                    SvgCachedImage img = new SvgCachedImage()
+                    {
+                        Source = item.Image,
+                        Aspect = Aspect.AspectFit,
+                        WidthRequest = App.Current.MainPage.Width / Columns,
+                        InputTransparent = true
+                    };
+                    if ( ImageWidth > 0 )
+                    {
+                        img.WidthRequest = ImageWidth;
+                    }
+
+                    sl.Children.Add( img );
+                }
+                else
+                {
+                    CachedImage img = new CachedImage()
+                    {
+                        Source = item.Image,
+                        Aspect = Aspect.AspectFit,
+                        WidthRequest = Application.Current.MainPage.Width / Columns,
+                        InputTransparent = true
+                    };
+                    if ( ImageWidth > 0 )
+                    {
+                        img.WidthRequest = ImageWidth;
+                    }
+
+                    sl.Children.Add( img );
+                }
             }
             else
             {
@@ -177,16 +187,32 @@ namespace Avalanche.Components.ListView
                 sl.Children.Add( icon );
             }
 
-            Label label = new Label()
+            Label title = new Label()
             {
                 Text = item.Title,
                 HorizontalOptions = LayoutOptions.Center,
                 FontSize = item.FontSize,
                 HorizontalTextAlignment = TextAlignment.Center,
+                FontAttributes = FontAttributes.Bold,
                 InputTransparent = true,
                 TextColor = item.TextColor
             };
-            sl.Children.Add( label );
+            sl.Children.Add( title );
+
+            if ( !string.IsNullOrWhiteSpace( item.Description ) )
+            {
+                Label description = new Label()
+                {
+                    Margin = new Thickness( 0, -2, 0, 2 ),
+                    Text = item.Description,
+                    HorizontalOptions = LayoutOptions.Center,
+                    FontSize = item.FontSize,
+                    HorizontalTextAlignment = TextAlignment.Center,
+                    InputTransparent = true,
+                    TextColor = item.TextColor
+                };
+                sl.Children.Add( description );
+            }
 
             TapGestureRecognizer tgr = new TapGestureRecognizer()
             {
@@ -200,6 +226,5 @@ namespace Avalanche.Components.ListView
             sl.GestureRecognizers.Add( tgr );
             gGrid.Children.Add( sl, x, y );
         }
-
     }
 }

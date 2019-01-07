@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright Mark Lee
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ namespace Avalanche.Models
 {
     class ListViewResponse
     {
-        public List<ListElement> Content { get; set; }
+        public List<Dictionary<string, string>> Content { get; set; }
         public string NextRequest { get; set; }
     }
 }

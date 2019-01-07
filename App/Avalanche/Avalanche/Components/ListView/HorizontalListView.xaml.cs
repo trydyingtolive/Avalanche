@@ -1,6 +1,6 @@
 ﻿// <copyright>
 // Copyright Southeast Christian Church
-// Mark Lee
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Avalanche.CustomControls;
 using Avalanche.Models;
 using FFImageLoading.Forms;
+using FFImageLoading.Svg.Forms;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -56,7 +57,7 @@ namespace Avalanche.Components.ListView
                 _isRefreshing = value;
             }
         }
-        public ObservableCollection<ListElement> ItemsSource { get; set; }
+        public List<ListElement> ItemsSource { get; set; }
         public object SelectedItem { get; set; }
         public bool CanRefresh { get; set; }
 
@@ -67,8 +68,7 @@ namespace Avalanche.Components.ListView
         public HorizontalListView()
         {
             InitializeComponent();
-            ItemsSource = new ObservableCollection<ListElement>();
-            ItemsSource.CollectionChanged += ItemsSource_CollectionChanged;
+            ItemsSource = new List<ListElement>();
 
             svScrollView.Scrolled += SvScrollView_Scrolled;
 
@@ -87,19 +87,8 @@ namespace Avalanche.Components.ListView
             }
         }
 
-        private void ItemsSource_CollectionChanged( object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e )
-        {
-            if ( e.Action == NotifyCollectionChangedAction.Add )
-            {
-                AddItems( e );
-            }
-            else
-            {
-                ResetItems( e );
-            }
-        }
 
-        private void ResetItems( NotifyCollectionChangedEventArgs e )
+        public void Draw( )
         {
             slStackLayout.Children.Clear();
             foreach ( var item in ItemsSource )
@@ -108,12 +97,15 @@ namespace Avalanche.Components.ListView
             }
         }
 
-        private void AddItems( NotifyCollectionChangedEventArgs e )
+
+        protected override void OnSizeAllocated( double width, double height )
         {
-            foreach ( ListElement item in e.NewItems )
+            base.OnSizeAllocated( width, height );
+            foreach ( var child in slStackLayout.Children )
             {
-                AddCell( item );
+                child.WidthRequest = ( App.Current.MainPage.Width / Columns ) - ( slStackLayout.Spacing * ( Columns - 1 ) );
             }
+
         }
 
         private void AddCell( ListElement item )
@@ -127,12 +119,28 @@ namespace Avalanche.Components.ListView
             };
             if ( !string.IsNullOrWhiteSpace( item.Image ) )
             {
-                CachedImage img = new CachedImage()
+                if ( item.Image.Contains( ".svg" ) )
                 {
-                    Source = item.Image,
-                    Aspect = Aspect.AspectFit,
-                };
-                sl.Children.Add( img );
+                    SvgCachedImage img = new SvgCachedImage()
+                    {
+                        Source = item.Image,
+                        Aspect = Aspect.AspectFit,
+                        WidthRequest = App.Current.MainPage.Width / Columns,
+                        InputTransparent = true
+                    };
+                    sl.Children.Add( img );
+                }
+                else
+                {
+                    CachedImage img = new CachedImage()
+                    {
+                        Source = item.Image,
+                        Aspect = Aspect.AspectFit,
+                        WidthRequest = App.Current.MainPage.Width / Columns,
+                        InputTransparent = true
+                    };
+                    sl.Children.Add( img );
+                }
             }
             else
             {

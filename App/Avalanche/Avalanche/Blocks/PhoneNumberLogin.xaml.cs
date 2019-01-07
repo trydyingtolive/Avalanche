@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalanche.Interfaces;
 using Avalanche.Utilities;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -109,7 +110,10 @@ namespace Avalanche.Blocks
                     slLoading.IsVisible = false;
                     break;
                 case LoginResponse.Success:
-                    App.Current.MainPage = new NavigationPage( new Avalanche.MainPage( "home" ) );
+                    AvalancheNavigation.Footer = null;
+                    App.Current.MainPage = new AvalanchePage();
+                    AvalancheNavigation.RequestNewRckipid();
+                    FCMHelper.RegisterFCMToken();
                     break;
                 default:
                     break;

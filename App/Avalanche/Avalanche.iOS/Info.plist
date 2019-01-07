@@ -10,6 +10,8 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -45,11 +47,16 @@
 	<string>This app needs access to the camera to take photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to photos to save to change profile picture.</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>fontawesome.ttf</string>
+    <string>Comic-Sans-MS.ttf</string>
+    <string>slabo-27px-v4-latin-regular.ttf</string>
+    <string>OpenSans-Regular.ttf</string>
 	</array>
 	<key>UIMainStoryboardFile</key>
 	<string>LaunchScreen</string>
@@ -59,5 +66,10 @@
 	<string>Resources/Media.xcassets/AppIcons.appiconset</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+    <string>remote-notification</string>
+	</array>
 </dict>
 </plist>

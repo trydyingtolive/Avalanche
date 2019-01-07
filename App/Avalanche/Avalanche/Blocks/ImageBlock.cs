@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Avalanche.Interfaces;
 using Avalanche.Utilities;
 using Xamarin.Forms;
 
@@ -39,7 +40,7 @@ namespace Avalanche.Blocks
 
         private void Tgr_Tapped( object sender, EventArgs e )
         {
-            AttributeHelper.HandleActionItem( Attributes );
+            AvalancheNavigation.HandleActionItem( Attributes );
         }
     }
 }

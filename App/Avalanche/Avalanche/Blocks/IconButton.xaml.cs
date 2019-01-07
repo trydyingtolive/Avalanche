@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalanche.Interfaces;
 using Avalanche.Utilities;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -127,7 +128,7 @@ namespace Avalanche.Blocks
 
         private void BtnButton_Clicked( object sender, EventArgs e )
         {
-            AttributeHelper.HandleActionItem( Attributes );
+            AvalancheNavigation.HandleActionItem( Attributes );
         }
 
         public Dictionary<string, string> Attributes { get; set; }

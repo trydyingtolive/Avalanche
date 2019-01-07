@@ -29,6 +29,12 @@
                 <Rock:Zone Name="Main" runat="server" />
             </div>
         </div>
+
+        <div class="row">
+                    <div class="col-md-12">
+                        <Rock:Zone Name="Footer" runat="server" />
+                    </div>
+                </div>
         <!-- End Content Area -->
 
 	</main>

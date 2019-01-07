@@ -1,6 +1,6 @@
 ﻿// <copyright>
 // Copyright Southeast Christian Church
-// Copyright Mark Lee
+
 //
 // Licensed under the  Southeast Christian Church License (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalanche.Components;
 using Avalanche.Components.ListView;
+using Avalanche.Interfaces;
 using Avalanche.Models;
 using Avalanche.Utilities;
 using Newtonsoft.Json;
@@ -32,7 +33,6 @@ namespace Avalanche.Blocks
     {
         private IListViewComponent listViewComponent;
         private bool _manualRefresh = false;
-        private bool _useFresh = false;
         private bool _endOfList = false;
         private string _nextRequest;
         private string _initialRequest;
@@ -71,10 +71,6 @@ namespace Avalanche.Blocks
             {
                 AddRenderContent();
             }
-            else if ( Attributes.ContainsKey( "Request" ) && !string.IsNullOrWhiteSpace( Attributes["Request"] ) )
-            {
-                MessageHandler.Get( Attributes["Request"] );
-            }
 
             if ( Attributes.ContainsKey( "NextRequest" ) && !string.IsNullOrWhiteSpace( Attributes["NextRequest"] ) )
             {
@@ -89,6 +85,11 @@ namespace Avalanche.Blocks
             else
             {
                 listViewComponent.CanRefresh = false;
+            }
+
+            if ( !Attributes.ContainsKey( "Content" ) )
+            {
+                MessageHandler.Get( _initialRequest );
             }
 
             var view = ( View ) listViewComponent;
@@ -107,17 +108,31 @@ namespace Avalanche.Blocks
 
         private void AddRenderContent()
         {
-            List<ListElement> mlv = JsonConvert.DeserializeObject<List<ListElement>>( Attributes["Content"] );
+            List<Dictionary<string, string>> mlv = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>( Attributes["Content"] );
             foreach ( var element in mlv )
             {
                 AddElement( element );
             }
+            listViewComponent.ItemsSource = listViewComponent.ItemsSource.OrderBy(e => e.Order).ToList();
+            listViewComponent.Draw();
             listViewComponent.IsRefreshing = false;
         }
 
-        private void AddElement( ListElement element )
+        private void AddElement( Dictionary<string, string> template )
         {
-            AttributeHelper.ApplyTranslation( element, Attributes );
+            var keys = new List<string> { "Resource", "ActionType" };
+            var clonedAttributes = Attributes
+                .Where( a => !keys.Contains( a.Key ) )
+                .ToDictionary( a => a.Key, a => a.Value );
+
+            foreach ( var item in template )
+            {
+                clonedAttributes[item.Key] = item.Value;
+            }
+
+            var element = new ListElement();
+
+            AttributeHelper.ApplyTranslation( element, clonedAttributes );
             foreach ( var i in listViewComponent.ItemsSource )
             {
                 if ( !string.IsNullOrEmpty( i.Id ) && i.Id == element.Id )
@@ -126,7 +141,7 @@ namespace Avalanche.Blocks
                     break;
                 }
             }
-            listViewComponent.ItemsSource.Add( element );
+            listViewComponent.ItemsSource.Add(element);
         }
 
         #region Events
@@ -150,7 +165,7 @@ namespace Avalanche.Blocks
 
                 if ( !string.IsNullOrWhiteSpace( listViewResponse.NextRequest ) )
                 {
-                    _nextRequest = Attributes["NextRequest"];
+                    _nextRequest = listViewResponse.NextRequest;
                 }
                 else
                 {
@@ -159,9 +174,17 @@ namespace Avalanche.Blocks
 
                 foreach ( var listElement in listViewResponse.Content )
                 {
-                    AddElement( listElement );
+                    try
+                    {
+                        AddElement( listElement );
+                    }
+                    catch
+                    {
+                    }
                 }
                 listViewComponent.IsRefreshing = false;
+                listViewComponent.ItemsSource = listViewComponent.ItemsSource.OrderBy(i => i.Order).ToList();
+                listViewComponent.Draw();
             }
             catch ( Exception ex )
             {
@@ -174,7 +197,6 @@ namespace Avalanche.Blocks
         {
             _endOfList = false;
             _manualRefresh = true;
-            _useFresh = true;
             listViewComponent.IsRefreshing = true;
             if ( !string.IsNullOrWhiteSpace( _initialRequest ) )
             {
@@ -210,14 +232,35 @@ namespace Avalanche.Blocks
             }
 
             var item = listViewComponent.SelectedItem as ListElement;
-            if ( !string.IsNullOrWhiteSpace( item.Resource ) && !string.IsNullOrWhiteSpace( item.ActionType ) )
+            if ( item == null )
             {
-                AttributeHelper.HandleActionItem( new Dictionary<string, string> { { "Resource", item.Resource }, { "ActionType", item.ActionType } } );
+                return;
             }
 
+            //see if a parameter has been provided
+            //if not use the item's id
+            var parameter = item.Id;
+            if ( !string.IsNullOrWhiteSpace( item.Parameter ) )
+            {
+                parameter = item.Parameter;
+            }
+
+            //if the individual item determins it's action type and resource
+            if ( !string.IsNullOrWhiteSpace( item.Resource ) && !string.IsNullOrWhiteSpace( item.ActionType ) )
+            {
+                var actionDictionary = new Dictionary<string, string> {
+                    { "Resource", item.Resource },
+                    { "ActionType", item.ActionType },
+                    { "Parameter",  parameter}
+                };
+                AvalancheNavigation.HandleActionItem( actionDictionary );
+                return;
+            }
+
+            //default to the block is supplying the action type and resource
             listViewComponent.SelectedItem = null;
-            Attributes["Parameter"] = item.Id;
-            AttributeHelper.HandleActionItem( Attributes );
+            Attributes["Parameter"] = parameter;
+            AvalancheNavigation.HandleActionItem( Attributes );
         }
         #endregion
     }

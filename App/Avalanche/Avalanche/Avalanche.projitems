@@ -13,13 +13,17 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)AvalanchePage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Blocks\ButtonBlock.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Blocks\PersonCard.xaml.cs">
-      <DependentUpon>PersonCard.xaml</DependentUpon>
+    <Compile Include="$(MSBuildThisFileDirectory)Blocks\AudioPlayerBlock.xaml.cs">
+      <DependentUpon>AudioPlayerBlock.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Blocks\ButtonBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Blocks\FormBlock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Blocks\IconButton.xaml.cs">
       <DependentUpon>IconButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Blocks\PersonCard.xaml.cs">
+      <DependentUpon>PersonCard.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Blocks\ImageBlock.cs" />
@@ -29,11 +33,28 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Blocks\Preload.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Blocks\TextOverImage.xaml.cs">
+      <DependentUpon>TextOverImage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Blocks\VideoPlayerBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\ButtonElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\AddressElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\SwitchElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\CheckboxListElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\DatePickerElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\EditorElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\LabelElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\EntryElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\HiddenElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Components\FormElements\PickerElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\IconFont\FontAwesome.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\IIconFont.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Components\ListView\CardListView.xaml.cs">
       <DependentUpon>CardListView.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Components\ListView\CarouselListView.xaml.cs">
+      <DependentUpon>CarouselListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Components\ListView\ColumnListView.xaml.cs">
       <DependentUpon>ColumnListView.xaml</DependentUpon>
@@ -54,29 +75,33 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)CustomControls\IconLabel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IHasBlockMessenger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)LaunchPage.xaml.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)IconBlock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IFormElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IHasMedia.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\INotify.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\FormElementItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\FormResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\HomeRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\LayoutTemplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\RckipidToken.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\INativePlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CustomControls\VideoPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IHasBlockMessenger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\CustomFontTypeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\FCMHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\LaunchPage.xaml.cs">
       <DependentUpon>LaunchPage.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Layouts\NoScroll.xaml.cs">
-      <DependentUpon>NoScroll.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Layouts\Simple.xaml.cs">
-      <DependentUpon>Simple.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Interaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ListViewResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\MobileBlockResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ListElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\MediaFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\MediaFileMetaData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\BlockMessenger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\AttributeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AvalancheNavigation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Blocks\WebViewBlock.xaml.cs">
-      <DependentUpon>WebViewBlock.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Blocks\Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -85,9 +110,9 @@
       <DependentUpon>MarkdownDetail.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)IPageAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IRenderable.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MainPage.xaml.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPageAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IRenderable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Models\MobileBlock.cs" />
@@ -97,10 +122,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)PageAttributes\BackgroundColor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PageAttributes\BackgroundImage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\Constants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\LayoutManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\RockClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\MenuPage.xaml.cs">
+      <DependentUpon>MenuPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)MainPage.xaml">
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -117,24 +147,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Blocks\MarkdownDetail.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Blocks\WebViewBlock.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Blocks\IconButton.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Layouts\Simple.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -170,12 +182,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Layouts\NoScroll.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Components\ListView\CardListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
@@ -188,7 +194,37 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)LaunchPage.xaml">
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\LaunchPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Blocks\AudioPlayerBlock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Views\MenuPage.xaml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Blocks\IconButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Components\ListView\CarouselListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Blocks\TextOverImage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
